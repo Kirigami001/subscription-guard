@@ -1,73 +1,70 @@
-# Subscription Guard
+# 🛡️ SubscriptionGuard
 
-Subscription Guard — сервис для отслеживания и управления подписками. Он помогает видеть все активные платежи, контролировать ежемесячные расходы и своевременно планировать оплату.
+SubscriptionGuard — веб-сервис для централизованного учета, мониторинга и оптимизации регулярных подписок и цифровых сервисов.
 
-## Stack
+## 🛠️ Стек технологий
 
-- Frontend: React
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- ORM: Prisma
-- API: REST
-- Styling: inline CSS / React components
+- **Frontend:** React 18, Vite, Tailwind CSS, Lucide React (иконки)
+- **Backend:** Node.js, Express.js, CORS, Dotenv
+- **ORM & Database:** Prisma ORM, PostgreSQL (или SQLite для локальной разработки)
+- **Документация:** OpenAPI / REST спецификация, Word-отчет (`/docs`)
 
-## Project structure
+---
+
+## 📡 Спецификация REST API
+
+Базовый URL: `/api/v1`
+
+| Метод | Эндпоинт | Описание | Тело запроса (JSON) | Ответ (Код) |
+|---|---|---|---|---|
+| `GET` | `/health` | Проверка доступности сервиса | — | `{"status": "ok"}` (200) |
+| `GET` | `/subscriptions` | Получение списка всех подписок | — | `[Subscription]` (200) |
+| `GET` | `/subscriptions/:id` | Получение данных конкретной подписки | — | `Subscription` (200 / 404) |
+| `POST` | `/subscriptions` | Добавление новой подписки | Обязательные поля: `title`, `amount`, `billingPeriod`, `nextPayment` | `Subscription` (201) |
+| `PUT` | `/subscriptions/:id` | Редактирование существующей подписки | Поля для обновления (`title`, `amount`, `status` и др.) | `Subscription` (200) |
+| `DELETE` | `/subscriptions/:id` | Удаление подписки | — | `{"message": "Deleted"}` (200) |
+| `GET` | `/subscriptions/analytics/summary` | Сводная аналитика (сумма в месяц, активные подписки) | — | `{"monthlyTotal": 14200, "activeCount": 5}` (200) |
+
+### Пример схемы Subscription (JSON)
+```json
+{
+  "id": "clx...",
+  "title": "Spotify Premium",
+  "amount": 1500.0,
+  "currency": "KZT",
+  "billingPeriod": "MONTHLY",
+  "category": "Entertainment",
+  "nextPayment": "2026-11-01T00:00:00.000Z",
+  "status": "ACTIVE"
+}
+```
+
+---
+
+## 📂 Структура репозитория
 
 ```text
 subscription-guard/
-├── README.md
-├── .gitignore
-├── docs/
 ├── backend/
 │   ├── prisma/
 │   │   └── schema.prisma
 │   └── src/
 │       └── server.js
-└── frontend/
-    └── src/
-        └── App.jsx
+├── docs/
+│   └── Lab2_SubscriptionGuard_Dokumentacia.docx
+├── frontend/
+│   └── src/
+│       └── App.jsx
+└── README.md
 ```
 
-## API
-
-### Health check
-
-- `GET /api/v1/health` — health status of the service
-
-### Subscriptions
-
-- `GET /api/v1/subscriptions` — get all subscriptions
-- `GET /api/v1/subscriptions/:id` — get a subscription by ID
-- `POST /api/v1/subscriptions` — create a new subscription
-- `PUT /api/v1/subscriptions/:id` — update a subscription
-- `DELETE /api/v1/subscriptions/:id` — delete a subscription
-
-### Analytics
-
-- `GET /api/v1/subscriptions/analytics/summary` — summary analytics for active subscriptions
-
-### Example request body
-
-```json
-{
-  "title": "Netflix",
-  "description": "Video streaming",
-  "amount": 2490,
-  "currency": "KZT",
-  "category": "Entertainment",
-  "billingPeriod": "MONTHLY",
-  "nextPayment": "2026-11-01T00:00:00.000Z"
-}
-```
-
-## Local run
+## 🚀 Запуск проекта локально
 
 ### Backend
 
 ```bash
 cd backend
 npm install
-npx prisma generate
 npx prisma db push
 npm run dev
 ```
@@ -80,6 +77,57 @@ npm install
 npm run dev
 ```
 
-## Documentation
+---
 
-The project documentation and Word file are stored in the `docs/` folder.
+## 📋 Описание моделей данных
+
+### User
+- `id` — уникальный идентификатор (CUID)
+- `email` — электронная почта (уникальная)
+- `name` — имя пользователя
+- `subscriptions` — связь с подписками
+- `createdAt`, `updatedAt` — временные метки
+
+### Subscription
+- `id` — уникальный идентификатор (CUID)
+- `title` — название сервиса/подписки
+- `description` — описание (опционально)
+- `amount` — стоимость
+- `currency` — валюта (по умолчанию: KZT)
+- `category` — категория (по умолчанию: General)
+- `billingPeriod` — период платежа (WEEKLY, MONTHLY, YEARLY)
+- `status` — статус (ACTIVE, PAUSED, CANCELED)
+- `nextPayment` — дата следующего платежа
+- `userId` — связь с пользователем
+- `createdAt`, `updatedAt` — временные метки
+
+---
+
+## 🔧 Настройка окружения
+
+Создайте файл `.env` в папке `backend/`:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/subscription_guard"
+PORT=5000
+```
+
+Для локальной разработки с SQLite:
+
+```env
+DATABASE_URL="file:./dev.db"
+PORT=5000
+```
+
+---
+
+## 📄 Документация
+
+Проектная документация и отчеты расположены в папке `/docs`:
+- `Lab2_SubscriptionGuard_Dokumentacia.docx` — полный отчет по проекту
+
+---
+
+## 📝 Лицензия
+
+Проект создан как учебная работа.
