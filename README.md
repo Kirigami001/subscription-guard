@@ -1,60 +1,74 @@
 # Subscription Guard
 
-Subscription Guard — сервис для управления подписками, контроля статуса подписок и защиты доступа к платным возможностям.
+Subscription Guard — сервис для отслеживания и управления подписками. Он помогает видеть все активные платежи, контролировать ежемесячные расходы и своевременно планировать оплату.
 
-## Стек технологий
+## Stack
 
-- Frontend: React + Vite
+- Frontend: React
 - Backend: Node.js + Express
+- Database: PostgreSQL
+- ORM: Prisma
 - API: REST
-- База данных: PostgreSQL / Prisma
-- Авторизация: JWT (при необходимости)
-- Контейнеризация: Docker (по желанию)
+- Styling: inline CSS / React components
 
-## Архитектура
+## Project structure
 
-- `frontend/` — интерфейс пользователя
-- `backend/` — серверная логика и API
-- `backend/prisma/` — схема и миграции базы данных
-- `docs/` — документация и материалы проекта
+```text
+subscription-guard/
+├── README.md
+├── .gitignore
+├── docs/
+├── backend/
+│   ├── prisma/
+│   │   └── schema.prisma
+│   └── src/
+│       └── server.js
+└── frontend/
+    └── src/
+        └── App.jsx
+```
 
 ## API
 
-Ниже приведён базовый набор endpoints, который можно адаптировать под текущий проект:
+### Health check
 
-### Пользовательские подписки
+- `GET /api/v1/health` — health status of the service
 
-- `GET /api/subscriptions` — получение всех подписок пользователя
-- `GET /api/subscriptions/:id` — получение информации о подписке
-- `POST /api/subscriptions` — создание новой подписки
-- `PUT /api/subscriptions/:id` — обновление подписки
-- `DELETE /api/subscriptions/:id` — удаление подписки
+### Subscriptions
 
-### Статус и доступ
+- `GET /api/v1/subscriptions` — get all subscriptions
+- `GET /api/v1/subscriptions/:id` — get a subscription by ID
+- `POST /api/v1/subscriptions` — create a new subscription
+- `PUT /api/v1/subscriptions/:id` — update a subscription
+- `DELETE /api/v1/subscriptions/:id` — delete a subscription
 
-- `GET /api/subscriptions/status` — проверка статуса подписки
-- `POST /api/subscriptions/activate` — активация подписки
-- `POST /api/subscriptions/cancel` — отмена подписки
+### Analytics
 
-### Пример ответа
+- `GET /api/v1/subscriptions/analytics/summary` — summary analytics for active subscriptions
+
+### Example request body
 
 ```json
 {
-  "id": "sub_123",
-  "userId": "user_456",
-  "plan": "premium",
-  "status": "active",
-  "renewalDate": "2026-11-01T00:00:00.000Z"
+  "title": "Netflix",
+  "description": "Video streaming",
+  "amount": 2490,
+  "currency": "KZT",
+  "category": "Entertainment",
+  "billingPeriod": "MONTHLY",
+  "nextPayment": "2026-11-01T00:00:00.000Z"
 }
 ```
 
-## Запуск проекта
+## Local run
 
 ### Backend
 
 ```bash
 cd backend
 npm install
+npx prisma generate
+npx prisma db push
 npm run dev
 ```
 
@@ -66,10 +80,6 @@ npm install
 npm run dev
 ```
 
-## Документация
+## Documentation
 
-В папке `docs/` хранится проектная документация и материалы по заданию.
-
-## Примечание
-
-Если в проекте уже есть точные маршруты API, названия моделей или стек, их следует заменить на актуальные значения из рабочей версии приложения.
+The project documentation and Word file are stored in the `docs/` folder.
