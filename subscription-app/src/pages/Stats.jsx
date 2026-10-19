@@ -44,7 +44,7 @@ export default function Stats({ subscriptions }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
         {/* Распределение по категориям */}
-        <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
+        <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Расходы по категориям</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {Object.entries(categoryTotals).map(([cat, amount]) => {
@@ -55,7 +55,7 @@ export default function Stats({ subscriptions }) {
                     <span style={{ fontWeight: 500 }}>{cat}</span>
                     <span style={{ color: 'var(--text-muted)' }}>{amount.toLocaleString()} ₸ ({pct}%)</span>
                   </div>
-                  <div style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div className="chart-track" style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: 'var(--primary)', borderRadius: '4px' }} />
                   </div>
                 </div>
@@ -65,7 +65,7 @@ export default function Stats({ subscriptions }) {
         </div>
 
         {/* Динамика за полгода */}
-        <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
+        <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Динамика расходов (мес.)</h3>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '180px', paddingTop: '20px', gap: '12px' }}>
             {[
@@ -81,7 +81,7 @@ export default function Stats({ subscriptions }) {
               return (
                 <div key={item.m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{Math.round(item.v / 1000)}k</div>
-                  <div style={{ width: '100%', maxWidth: '36px', height: `${h}px`, background: item.m === 'Окт' ? 'var(--primary)' : '#93C5FD', borderRadius: '4px 4px 0 0' }} />
+                  <div className={item.m === 'Окт' ? '' : 'chart-bar-muted'} style={{ width: '100%', maxWidth: '36px', height: `${h}px`, background: item.m === 'Окт' ? 'var(--primary)' : '#93C5FD', borderRadius: '4px 4px 0 0' }} />
                   <div style={{ fontSize: '12px', fontWeight: 500 }}>{item.m}</div>
                 </div>
               );

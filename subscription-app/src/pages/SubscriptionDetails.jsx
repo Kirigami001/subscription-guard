@@ -30,7 +30,7 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
         ← Назад к списку
       </button>
 
-      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
           <div className="card-icon" style={{ backgroundColor: sub.brandColor || '#1E3A8A', width: '56px', height: '56px', fontSize: '24px' }}>
             {sub.title[0]}
@@ -50,7 +50,7 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', margin: '24px 0', background: '#F8FAFC', padding: '20px', borderRadius: '8px' }}>
+        <div className="soft-panel" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', margin: '24px 0', background: '#F8FAFC', padding: '20px', borderRadius: '8px' }}>
           <div>
             <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Стоимость за период</div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)' }}>

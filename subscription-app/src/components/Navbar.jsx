@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 
-export default function Navbar() {
+export default function Navbar({ theme, onToggleTheme, user, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,8 +24,12 @@ export default function Navbar() {
         </ul>
 
         <Link to="/profile" className="user-badge">
-          👤 Дидар (IT1-2306)
+          👤 {user?.name || user?.email}
         </Link>
+        <button className="btn btn-outline logout-button" onClick={onLogout}>Выйти</button>
+        <button className="btn btn-outline theme-toggle" onClick={onToggleTheme} aria-label={theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'}>
+          {theme === 'dark' ? '☀️ Светлая' : '🌙 Тёмная'}
+        </button>
       </div>
     </nav>
   );

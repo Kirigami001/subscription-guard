@@ -55,9 +55,9 @@ export default function AddSubscription({ onAddSubscription }) {
         <p style={{ color: 'var(--text-muted)' }}>Заполните данные для начала отслеживания нового сервиса</p>
       </div>
 
-      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
         {error && (
-          <div style={{ background: '#FEE2E2', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+          <div className="error-panel" style={{ background: '#FEE2E2', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             {error}
           </div>
         )}

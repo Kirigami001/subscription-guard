@@ -23,7 +23,7 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
       </div>
 
       {/* Панель фильтров */}
-      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="text"
           placeholder="🔍 Поиск подписки..."
@@ -38,7 +38,7 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
-              className="btn"
+                className="btn status-filter"
               style={{
                 background: selectedStatus === status ? 'var(--primary)' : '#F1F5F9',
                 color: selectedStatus === status ? '#FFF' : 'var(--text)',
@@ -65,7 +65,7 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
 
       {/* Список */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="page-panel" style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '12px' }}>Ничего не найдено</p>
           <Button variant="secondary" onClick={() => { setSearch(''); setSelectedCategory('Все'); setSelectedStatus('all'); }}>
             Сбросить фильтры

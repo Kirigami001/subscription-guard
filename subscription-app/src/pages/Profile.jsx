@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Profile() {
+export default function Profile({ user }) {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
       <div style={{ marginBottom: '24px' }}>
@@ -8,14 +8,14 @@ export default function Profile() {
         <p style={{ color: 'var(--text-muted)' }}>Параметры учетной записи и сведения о разработчиках</p>
       </div>
 
-      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
+      <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 700 }}>
-            ДЗ
+            {(user?.name || 'U').split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Дидар Женис</h2>
-            <div style={{ color: 'var(--text-muted)' }}>Студент группы IT1-2306 • МУИТ (IITU)</div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700 }}>{user?.name || 'Пользователь'}</h2>
+            <div style={{ color: 'var(--text-muted)' }}>{user?.email}</div>
           </div>
         </div>
 
@@ -33,7 +33,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '28px' }}>
+      <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '28px' }}>
         <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Параметры приложения</h3>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
