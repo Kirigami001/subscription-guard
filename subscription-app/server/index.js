@@ -617,6 +617,8 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, {
         ok: true,
         database: 'sqlite',
+        apiVersion: 3,
+        seedSupport: true,
         uptimeSec: Math.round(process.uptime()),
       });
     }

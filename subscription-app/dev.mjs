@@ -6,19 +6,40 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const viteBin = resolve(__dirname, 'node_modules/vite/bin/vite.js');
 const serverEntry = resolve(__dirname, 'server/index.js');
 
-async function isBackendAlive() {
+async function checkExistingBackend() {
   try {
     const res = await fetch('http://127.0.0.1:3001/api/health', {
       signal: AbortSignal.timeout(400),
     });
-    return res.ok;
+    if (!res.ok) return { alive: false };
+    const data = await res.json().catch(() => ({}));
+    return { alive: true, data };
+  } catch {
+    return { alive: false };
+  }
+}
+
+async function isPort5173Busy() {
+  try {
+    await fetch('http://127.0.0.1:5173/', { signal: AbortSignal.timeout(300) });
+    return true;
   } catch {
     return false;
   }
 }
 
+const existingBackend = await checkExistingBackend();
 let serverProc = null;
-if (await isBackendAlive()) {
+if (existingBackend.alive) {
+  if (!existingBackend.data?.seedSupport) {
+    console.error(
+      '[SubTrack] ОШИБКА: на порту 3001 уже запущена СТАРАЯ версия backend-сервера!'
+    );
+    console.error(
+      '[SubTrack] Закройте старый терминал (или остановите старый процесс node) и снова запустите npm run dev.'
+    );
+    process.exit(1);
+  }
   console.log('[SubTrack] Backend уже запущен на http://127.0.0.1:3001');
 } else {
   serverProc = spawn(process.execPath, [serverEntry], {
@@ -31,9 +52,17 @@ if (await isBackendAlive()) {
     if (serverProc.exitCode !== null) {
       process.exit(serverProc.exitCode || 1);
     }
-    if (await isBackendAlive()) break;
+    const check = await checkExistingBackend();
+    if (check.alive) break;
     await new Promise((r) => setTimeout(r, 150));
   }
+}
+
+const hasCustomPort = process.argv.includes('--port') || process.argv.includes('-p');
+if (!hasCustomPort && (await isPort5173Busy())) {
+  console.warn(
+    '[SubTrack] ВНИМАНИЕ: порт 5173 уже занят другим запущенным сервером! Откройте новый порт, который Vite покажет ниже, или закройте старый терминал.'
+  );
 }
 
 const viteProc = spawn(process.execPath, [viteBin, ...process.argv.slice(2)], {
