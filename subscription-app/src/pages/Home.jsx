@@ -47,7 +47,7 @@ export default function Home({
           <p style={{ color: 'var(--text-muted)' }}>Обзор всех ваших регулярных платежей и активных подписок</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {subscriptions.length === 0 && onSeedSubscriptions && (
+          {subscriptions.length < 3 && onSeedSubscriptions && (
             <Button variant="secondary" disabled={seeding} onClick={handleSeed}>
               {seeding ? 'Загрузка…' : 'Загрузить примеры'}
             </Button>

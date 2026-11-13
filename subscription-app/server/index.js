@@ -33,7 +33,8 @@ db.exec(`
     password_hash TEXT NOT NULL,
     reminder_days INTEGER NOT NULL DEFAULT 7,
     notifications_enabled INTEGER NOT NULL DEFAULT 1,
-    unused_detection_enabled INTEGER NOT NULL DEFAULT 1
+    unused_detection_enabled INTEGER NOT NULL DEFAULT 1,
+    seeded_demo INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS sessions (
     token_hash TEXT PRIMARY KEY,
@@ -71,6 +72,9 @@ if (!userColumns.has('notifications_enabled')) {
 }
 if (!userColumns.has('unused_detection_enabled')) {
   db.exec('ALTER TABLE users ADD COLUMN unused_detection_enabled INTEGER NOT NULL DEFAULT 1');
+}
+if (!userColumns.has('seeded_demo')) {
+  db.exec('ALTER TABLE users ADD COLUMN seeded_demo INTEGER NOT NULL DEFAULT 0');
 }
 
 const q = (sql) => db.prepare(sql);
@@ -227,9 +231,22 @@ function seedDemoSubscriptionsForUser(userId, onlyIfEmpty = true) {
     createdIds.push(id);
   }
 
+  q('UPDATE users SET seeded_demo = 1 WHERE id = ?').run(userId);
+
   return q('SELECT * FROM subscriptions WHERE user_id = ? ORDER BY next_payment ASC')
     .all(userId)
     .map(subRow);
+}
+
+function ensureInitialDemoSeed(userId) {
+  const row = q('SELECT seeded_demo FROM users WHERE id = ?').get(userId);
+  if (!row || row.seeded_demo) return;
+  const countRow = q('SELECT COUNT(*) AS cnt FROM subscriptions WHERE user_id = ?').get(userId);
+  if (countRow && countRow.cnt === 0) {
+    seedDemoSubscriptionsForUser(userId, true);
+  } else {
+    q('UPDATE users SET seeded_demo = 1 WHERE id = ?').run(userId);
+  }
 }
 
 const hashToken = (token) => createHash('sha256').update(token).digest('hex');
@@ -668,6 +685,7 @@ const server = http.createServer(async (req, res) => {
         return send(res, 401, { error: 'Неверная почта или пароль' });
       }
 
+      ensureInitialDemoSeed(user.id);
       const token = createSession(user.id);
       return send(
         res,
@@ -687,7 +705,11 @@ const server = http.createServer(async (req, res) => {
 
     if (path === '/api/auth/me' && req.method === 'GET') {
       const user = getUser(req);
-      return user ? send(res, 200, { user }) : send(res, 401, { error: 'Не авторизован' });
+      if (user) {
+        ensureInitialDemoSeed(user.id);
+        return send(res, 200, { user });
+      }
+      return send(res, 401, { error: 'Не авторизован' });
     }
 
     const user = getUser(req);

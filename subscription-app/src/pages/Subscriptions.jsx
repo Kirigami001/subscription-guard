@@ -48,6 +48,11 @@ export default function Subscriptions({
           <p style={{ color: 'var(--text-muted)' }}>Полный список ваших подписок с удобной фильтрацией и поиском</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {subscriptions.length < 3 && onSeedSubscriptions && (
+            <Button variant="secondary" disabled={seeding} onClick={handleSeed}>
+              {seeding ? 'Загрузка…' : 'Загрузить примеры'}
+            </Button>
+          )}
           <a href="/api/subscriptions/export" download="subtrack-subscriptions.csv" className="btn btn-outline">
             ⤓ Экспорт CSV
           </a>
