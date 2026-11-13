@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Button from './Button.jsx';
 
-export default function SubscriptionCard({ subscription, onCancel }) {
+export default function SubscriptionCard({ subscription, onCancel, onDelete }) {
   const { id, title, category, amount, currency, billingPeriod, nextPayment, status, brandColor, unusedWarning } = subscription;
 
   const statusMap = {
@@ -35,7 +35,7 @@ export default function SubscriptionCard({ subscription, onCancel }) {
         )}
 
         <div className="card-price">
-          {amount.toLocaleString()} {currency} <span>/ {billingPeriod === 'monthly' ? 'мес' : 'год'}</span>
+          {Number(amount).toLocaleString()} {currency} <span>/ {billingPeriod === 'monthly' ? 'мес' : 'год'}</span>
         </div>
 
         <div className="card-next-date">
@@ -49,6 +49,9 @@ export default function SubscriptionCard({ subscription, onCancel }) {
         </Link>
         {status === 'active' && onCancel && (
           <Button variant="danger" onClick={() => onCancel(id)}>Отменить</Button>
+        )}
+        {status === 'cancelled' && onDelete && (
+          <Button variant="danger" onClick={() => onDelete(id)}>Удалить</Button>
         )}
       </div>
     </div>

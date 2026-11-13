@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Button from '../components/Button.jsx';
 
-export default function SubscriptionDetails({ subscriptions, onCancelSubscription, onTogglePause }) {
+export default function SubscriptionDetails({
+  subscriptions,
+  onCancelSubscription,
+  onTogglePause,
+  onDeleteSubscription
+}) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
 
   const sub = subscriptions.find(s => s.id === id);
 
@@ -19,7 +25,43 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
     );
   }
 
+  const statusMap = {
+    active: 'Активна',
+    paused: 'На паузе',
+    trialing: 'Пробная',
+    cancelled: 'Отменена'
+  };
+
   const yearlyTotal = sub.billingPeriod === 'monthly' ? sub.amount * 12 : sub.amount;
+
+  const handleTogglePause = async () => {
+    setBusy(true);
+    try {
+      await onTogglePause(sub.id);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    setBusy(true);
+    try {
+      await onCancelSubscription(sub.id);
+      navigate('/subscriptions');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setBusy(true);
+    try {
+      await onDeleteSubscription(sub.id);
+      navigate('/subscriptions');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
@@ -33,14 +75,14 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
       <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
           <div className="card-icon" style={{ backgroundColor: sub.brandColor || '#1E3A8A', width: '56px', height: '56px', fontSize: '24px' }}>
-            {sub.title[0]}
+            {sub.title ? sub.title[0].toUpperCase() : 'S'}
           </div>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: 700 }}>{sub.title}</h1>
             <span style={{ color: 'var(--text-muted)', fontSize: '15px' }}>{sub.category}</span>
           </div>
           <span className={`badge badge-${sub.status}`} style={{ marginLeft: 'auto', fontSize: '14px', padding: '6px 14px' }}>
-            {sub.status === 'active' ? 'Активна' : sub.status === 'paused' ? 'На паузе' : sub.status}
+            {statusMap[sub.status] || sub.status}
           </span>
         </div>
 
@@ -54,7 +96,7 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
           <div>
             <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Стоимость за период</div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)' }}>
-              {sub.amount.toLocaleString()} {sub.currency}
+              {Number(sub.amount).toLocaleString()} {sub.currency}
             </div>
             <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
               Период: {sub.billingPeriod === 'monthly' ? 'Каждый месяц' : 'Раз в год'}
@@ -63,7 +105,7 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
           <div>
             <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Годовые затраты</div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--primary)' }}>
-              {yearlyTotal.toLocaleString()} {sub.currency}
+              {Number(yearlyTotal).toLocaleString()} {sub.currency}
             </div>
             <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
               След. списание: {sub.nextPayment}
@@ -79,12 +121,24 @@ export default function SubscriptionDetails({ subscriptions, onCancelSubscriptio
         )}
 
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
-          <Button variant="secondary" onClick={() => onTogglePause(sub.id)}>
-            {sub.status === 'paused' ? 'Возобновить' : 'Приостановить'}
+          <Button variant="secondary" disabled={busy} onClick={handleTogglePause}>
+            {sub.status === 'paused' || sub.status === 'cancelled' ? 'Возобновить' : 'Приостановить'}
           </Button>
-          <Button variant="danger" onClick={() => { onCancelSubscription(sub.id); navigate('/subscriptions'); }}>
-            Отменить подписку
-          </Button>
+          {sub.status !== 'cancelled' && (
+            <Button variant="danger" disabled={busy} onClick={handleCancel}>
+              Отменить подписку
+            </Button>
+          )}
+          {onDeleteSubscription && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+              onClick={handleDelete}
+            >
+              Удалить подписку
+            </Button>
+          )}
         </div>
       </div>
     </div>

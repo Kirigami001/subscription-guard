@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import SubscriptionCard from '../components/SubscriptionCard.jsx';
 import Button from '../components/Button.jsx';
 import { categoriesList } from '../data.js';
 
-export default function Subscriptions({ subscriptions, onCancelSubscription }) {
+export default function Subscriptions({ subscriptions, onCancelSubscription, onDeleteSubscription }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
   const [selectedStatus, setSelectedStatus] = useState('all');
+
+  const statusLabels = {
+    all: 'Все статусы',
+    active: 'Активные',
+    paused: 'На паузе',
+    trialing: 'Пробные',
+    cancelled: 'Отменённые'
+  };
 
   const filtered = subscriptions.filter(sub => {
     const matchesSearch = sub.title.toLowerCase().includes(search.toLowerCase());
@@ -34,11 +43,11 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
         />
 
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {['all', 'active', 'paused', 'trialing'].map(status => (
+          {['all', 'active', 'paused', 'trialing', 'cancelled'].map(status => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
-                className="btn status-filter"
+              className="btn status-filter"
               style={{
                 background: selectedStatus === status ? 'var(--primary)' : '#F1F5F9',
                 color: selectedStatus === status ? '#FFF' : 'var(--text)',
@@ -46,7 +55,7 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
                 fontSize: '13px'
               }}
             >
-              {status === 'all' ? 'Все статусы' : status === 'active' ? 'Активные' : status === 'paused' ? 'На паузе' : 'Пробные'}
+              {statusLabels[status]}
             </button>
           ))}
         </div>
@@ -64,7 +73,14 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
       </div>
 
       {/* Список */}
-      {filtered.length === 0 ? (
+      {subscriptions.length === 0 ? (
+        <div className="page-panel" style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>
+          <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '12px' }}>У вас пока нет подписок</p>
+          <Link to="/add">
+            <Button variant="primary">+ Добавить подписку</Button>
+          </Link>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="page-panel" style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '12px' }}>Ничего не найдено</p>
           <Button variant="secondary" onClick={() => { setSearch(''); setSelectedCategory('Все'); setSelectedStatus('all'); }}>
@@ -74,7 +90,12 @@ export default function Subscriptions({ subscriptions, onCancelSubscription }) {
       ) : (
         <div className="cards-grid">
           {filtered.map(sub => (
-            <SubscriptionCard key={sub.id} subscription={sub} onCancel={onCancelSubscription} />
+            <SubscriptionCard
+              key={sub.id}
+              subscription={sub}
+              onCancel={onCancelSubscription}
+              onDelete={onDeleteSubscription}
+            />
           ))}
         </div>
       )}

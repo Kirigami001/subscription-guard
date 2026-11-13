@@ -17,13 +17,16 @@ export default function AddSubscription({ onAddSubscription }) {
   });
 
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!formData.title.trim()) {
       setError('Укажите название подписки');
       return;
@@ -37,15 +40,23 @@ export default function AddSubscription({ onAddSubscription }) {
       return;
     }
 
-    onAddSubscription({
-      ...formData,
-      amount: Number(formData.amount),
-      currency: '₸',
-      status: 'active',
-      unusedWarning: false
-    });
+    setBusy(true);
+    try {
+      await onAddSubscription({
+        ...formData,
+        title: formData.title.trim(),
+        amount: Number(formData.amount),
+        currency: '₸',
+        status: 'active',
+        unusedWarning: false
+      });
 
-    navigate('/subscriptions');
+      navigate('/subscriptions');
+    } catch (err) {
+      setError(err.message || 'Не удалось сохранить подписку');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -57,7 +68,7 @@ export default function AddSubscription({ onAddSubscription }) {
 
       <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
         {error && (
-          <div className="error-panel" style={{ background: '#FEE2E2', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+          <div className="error-panel" role="alert" style={{ background: '#FEE2E2', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             {error}
           </div>
         )}
@@ -77,6 +88,8 @@ export default function AddSubscription({ onAddSubscription }) {
               label="Стоимость (₸)"
               name="amount"
               type="number"
+              min="1"
+              step="any"
               placeholder="3490"
               value={formData.amount}
               onChange={handleChange}
@@ -135,7 +148,9 @@ export default function AddSubscription({ onAddSubscription }) {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-            <Button type="submit" variant="primary" style={{ flex: 1 }}>Сохранить подписку</Button>
+            <Button type="submit" variant="primary" disabled={busy} style={{ flex: 1 }}>
+              {busy ? 'Сохранение…' : 'Сохранить подписку'}
+            </Button>
             <Button type="button" variant="outline" onClick={() => navigate(-1)}>Отмена</Button>
           </div>
         </form>
