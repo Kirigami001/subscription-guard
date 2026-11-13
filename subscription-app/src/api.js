@@ -1,18 +1,49 @@
 export async function api(path, options = {}) {
-  const { headers: customHeaders, ...restOptions } = options;
-  const response = await fetch(`/api${path}`, {
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-      ...customHeaders,
-    },
-    ...restOptions,
-  });
-
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(data.error || `Ошибка ${response.status}`);
+  let response;
+  try {
+    const { headers: customHeaders, ...restOptions } = options;
+    response = await fetch(`/api${path}`, {
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        ...customHeaders,
+      },
+      ...restOptions,
+    });
+  } catch {
+    const err = new Error(
+      'Не удалось подключиться к серверу. Убедитесь, что приложение запущено через npm run dev.'
+    );
+    err.status = 0;
+    throw err;
   }
+
+  const rawText = await response.text();
+  let data = {};
+  try {
+    data = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    let message = data.error;
+    if (!message) {
+      if (response.status >= 500) {
+        message =
+          'Backend-сервер (порт 3001) не запущен или не отвечает. Запустите в папке subscription-app: npm run dev (или npm run server).';
+      } else if (response.status === 404 || response.status === 405) {
+        message =
+          'API-сервер не найден. Для регистрации и базы данных SQLite запускайте проект локально, а не на статическом хостинге.';
+      } else {
+        message = `Ошибка ${response.status}`;
+      }
+    }
+    const err = new Error(message);
+    err.status = response.status;
+    throw err;
+  }
+
   return data;
 }
 

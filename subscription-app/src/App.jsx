@@ -27,7 +27,11 @@ export default function App() {
     authApi
       .me()
       .then(({ user: currentUser }) => setUser(currentUser))
-      .catch(() => {})
+      .catch((err) => {
+        if (err?.status !== 401) {
+          setError(err.message);
+        }
+      })
       .finally(() => setReady(true));
   }, []);
 
@@ -44,7 +48,6 @@ export default function App() {
     if (!user) {
       setSubscriptions([]);
       setInsights(null);
-      setError('');
       return;
     }
 
@@ -116,6 +119,11 @@ export default function App() {
     }
   };
 
+  const handleAuthenticated = (loggedInUser) => {
+    setError('');
+    setUser(loggedInUser);
+  };
+
   if (!ready) {
     return <div style={{ padding: 30 }}>Загрузка SubTrack…</div>;
   }
@@ -130,11 +138,11 @@ export default function App() {
       <Routes>
         <Route
           path="/register"
-          element={user ? <Navigate to="/" replace /> : <Auth mode="register" onAuthenticated={setUser} />}
+          element={user ? <Navigate to="/" replace /> : <Auth mode="register" onAuthenticated={handleAuthenticated} />}
         />
         <Route
           path="/login"
-          element={user ? <Navigate to="/" replace /> : <Auth mode="login" onAuthenticated={setUser} />}
+          element={user ? <Navigate to="/" replace /> : <Auth mode="login" onAuthenticated={handleAuthenticated} />}
         />
         <Route
           path="/"

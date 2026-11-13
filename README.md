@@ -61,22 +61,17 @@ cd subscription-app
 npm install
 ```
 
-2. Запустите Backend (терминал №1, в папке `subscription-app`):
-```bash
-npm run server
-# или: node server/index.js
-```
-API поднимется на `http://127.0.0.1:3001`, база данных автоматически создастся в `subscription-app/server/data/subtrack.sqlite` (в Git не коммитится).
-
-3. Запустите Frontend (терминал №2, в папке `subscription-app`):
+2. Запустите весь проект **одной командой** (автоматически поднимет и Backend на `3001`, и Frontend на `5173`):
 ```bash
 npm run dev
 ```
+*(Если нужно запускать раздельно: в одном терминале `npm run server`, во втором — `npm run client`.)*
 
-4. Откройте приложение в браузере:
+3. Откройте приложение в браузере:
 ```text
 http://localhost:5173
 ```
+База данных SQLite создастся автоматически в `subscription-app/server/data/subtrack.sqlite` (в Git не коммитится).
 Проверка работоспособности API и SQLite: `http://127.0.0.1:3001/api/health` → `{"ok":true,"database":"sqlite"}`.
 
 ---

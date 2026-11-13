@@ -1,9 +1,21 @@
 import http from 'node:http';
-import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+let DatabaseSync;
+try {
+  ({ DatabaseSync } = await import('node:sqlite'));
+} catch {
+  console.error(
+    `[SubTrack] Требуется Node.js 22.13+ (или 24+) со встроенным модулем node:sqlite. Текущая версия: ${process.version}.`
+  );
+  console.error(
+    '[SubTrack] На Node 22.5–22.12 можно запустить с флагом: node --experimental-sqlite server/index.js'
+  );
+  process.exit(1);
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dbFile = resolve(process.env.DB_PATH || resolve(__dirname, 'data/subtrack.sqlite'));
