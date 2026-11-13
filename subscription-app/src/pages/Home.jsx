@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SubscriptionCard from '../components/SubscriptionCard.jsx';
 import Button from '../components/Button.jsx';
 
 const monthlyAmount = (s) => Number(s.amount) / (s.billingPeriod === 'yearly' ? 12 : 1);
 
-export default function Home({ subscriptions, insights, onCancelSubscription, onDeleteSubscription }) {
+export default function Home({
+  subscriptions,
+  insights,
+  onCancelSubscription,
+  onDeleteSubscription,
+  onSeedSubscriptions
+}) {
+  const [seeding, setSeeding] = useState(false);
+
   const activeSubs = subscriptions.filter(s => s.status === 'active');
   const computedMonthly = activeSubs.reduce((sum, s) => sum + monthlyAmount(s), 0);
   const totalMonthly = insights?.monthlyEquivalent ?? computedMonthly;
@@ -17,7 +25,19 @@ export default function Home({ subscriptions, insights, onCancelSubscription, on
     (a, b) => a.nextPayment.localeCompare(b.nextPayment)
   );
   const nextSub = sortedByDate[0];
-  const upcomingSevenDays = insights?.upcoming || [];
+  const upcomingPayments = insights?.upcoming || [];
+  const recommendations = insights?.recommendations || [];
+  const potentialYearlySavings = insights?.potentialYearlySavings || 0;
+
+  const handleSeed = async () => {
+    if (!onSeedSubscriptions) return;
+    setSeeding(true);
+    try {
+      await onSeedSubscriptions();
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   return (
     <div>
@@ -26,9 +46,16 @@ export default function Home({ subscriptions, insights, onCancelSubscription, on
           <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text)' }}>Панель управления</h1>
           <p style={{ color: 'var(--text-muted)' }}>Обзор всех ваших регулярных платежей и активных подписок</p>
         </div>
-        <Link to="/add">
-          <Button variant="primary">+ Добавить подписку</Button>
-        </Link>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {subscriptions.length === 0 && onSeedSubscriptions && (
+            <Button variant="secondary" disabled={seeding} onClick={handleSeed}>
+              {seeding ? 'Загрузка…' : 'Загрузить примеры'}
+            </Button>
+          )}
+          <Link to="/add">
+            <Button variant="primary">+ Добавить подписку</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Метрики */}
@@ -41,7 +68,11 @@ export default function Home({ subscriptions, insights, onCancelSubscription, on
         <div className="metric-card">
           <div className="label">Прогноз на год</div>
           <div className="value">{Math.round(totalYearly).toLocaleString()} ₸</div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Экономия при контроле</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+            {potentialYearlySavings > 0
+              ? `Потенциал экономии: ${Math.round(potentialYearlySavings).toLocaleString()} ₸`
+              : 'Экономия при контроле'}
+          </div>
         </div>
         <div className="metric-card">
           <div className="label">Активные сервисы</div>
@@ -57,10 +88,30 @@ export default function Home({ subscriptions, insights, onCancelSubscription, on
         </div>
       </div>
 
-      {upcomingSevenDays.length > 0 && (
-        <div className="alert-warning" style={{ marginBottom: '24px' }}>
-          <strong>Ближайшие списания (в ближайшие 7 дней):</strong>{' '}
-          {upcomingSevenDays.map(item => `${item.title} (${item.nextPayment})`).join(', ')}
+      {upcomingPayments.length > 0 && (
+        <div className="alert-warning" style={{ marginBottom: '20px' }}>
+          <strong>Ближайшие списания (в ближайшие {insights?.reminderDays || 7} дн.):</strong>{' '}
+          {upcomingPayments.map(item => `${item.title} (${item.nextPayment})`).join(', ')}
+        </div>
+      )}
+
+      {recommendations.length > 0 && (
+        <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '18px 20px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Рекомендации по оптимизации подписок</h2>
+            {potentialYearlySavings > 0 && (
+              <span className="badge badge-paused">
+                Экономия до {Math.round(potentialYearlySavings).toLocaleString()} ₸/год
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'grid', gap: '8px' }}>
+            {recommendations.map((rec, idx) => (
+              <div key={idx} style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
+                <strong style={{ color: 'var(--text)' }}>{rec.title}:</strong> {rec.detail}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -77,9 +128,16 @@ export default function Home({ subscriptions, insights, onCancelSubscription, on
           <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '16px' }}>
             У вас пока нет добавленных подписок
           </p>
-          <Link to="/add">
-            <Button variant="primary">+ Добавить первую подписку</Button>
-          </Link>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {onSeedSubscriptions && (
+              <Button variant="secondary" disabled={seeding} onClick={handleSeed}>
+                {seeding ? 'Загрузка…' : 'Загрузить примеры подписок'}
+              </Button>
+            )}
+            <Link to="/add">
+              <Button variant="primary">+ Добавить первую подписку</Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="cards-grid">

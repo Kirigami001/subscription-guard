@@ -9,18 +9,25 @@ export default function Stats({ subscriptions, insights }) {
   const totalYearly = insights?.yearlyEquivalent ?? computedMonthly * 12;
   const avgSpend = activeSubs.length ? Math.round(totalMonthly / activeSubs.length) : 0;
   const maxSpend = activeSubs.length ? Math.round(Math.max(...activeSubs.map(s => monthlyAmount(s)))) : 0;
+  const potentialYearlySavings = insights?.potentialYearlySavings || 0;
 
-  // Группировка по категориям (в месячном эквиваленте)
+  // Группировка по категориям (в месячном эквиваленте, по убыванию)
   const categoryTotals = {};
   activeSubs.forEach(sub => {
     categoryTotals[sub.category] = (categoryTotals[sub.category] || 0) + monthlyAmount(sub);
   });
+  const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
 
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Аналитика и статистика</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Структура расходов и распределение затрат по направлениям</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Аналитика и статистика</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Структура расходов и распределение затрат по направлениям</p>
+        </div>
+        <a href="/api/subscriptions/export" download="subtrack-subscriptions.csv" className="btn btn-outline">
+          ⤓ Скачать CSV-отчёт
+        </a>
       </div>
 
       <div className="metrics-row">
@@ -50,13 +57,13 @@ export default function Stats({ subscriptions, insights }) {
         {/* Распределение по категориям */}
         <div className="page-panel" style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Расходы по категориям</h3>
-          {Object.keys(categoryTotals).length === 0 ? (
+          {sortedCategories.length === 0 ? (
             <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
               Нет активных подписок для расчёта распределения по категориям.
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {Object.entries(categoryTotals).map(([cat, amount]) => {
+              {sortedCategories.map(([cat, amount]) => {
                 const pct = totalMonthly > 0 ? Math.round((amount / totalMonthly) * 100) : 0;
                 return (
                   <div key={cat}>
@@ -80,6 +87,11 @@ export default function Stats({ subscriptions, insights }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
             <p>В месяц: <strong>{Math.round(totalMonthly).toLocaleString()} ₸</strong></p>
             <p>В год: <strong>{Math.round(totalYearly).toLocaleString()} ₸</strong></p>
+            {potentialYearlySavings > 0 && (
+              <p style={{ color: 'var(--success)' }}>
+                Потенциальная экономия в год: <strong>{Math.round(potentialYearlySavings).toLocaleString()} ₸</strong>
+              </p>
+            )}
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
             Оценка на основе активных подписок. История фактических списаний не ведётся.

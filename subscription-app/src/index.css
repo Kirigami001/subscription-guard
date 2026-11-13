@@ -385,7 +385,8 @@ body {
   margin-bottom: 16px;
 }
 
-.theme-toggle { white-space: nowrap; }
+.theme-toggle, .logout-button { white-space: nowrap; }
+.mobile-only-nav { display: none; }
 
 .auth-page {
   min-height: calc(100vh - 64px);
@@ -487,8 +488,13 @@ body {
   .nav-links.open {
     display: flex;
   }
+  .mobile-only-nav {
+    display: block;
+    width: 100%;
+  }
   .navbar-inner {
     flex-wrap: wrap;
+    gap: 10px;
   }
   .user-badge {
     display: none;

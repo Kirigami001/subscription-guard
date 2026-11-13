@@ -74,6 +74,21 @@ http://localhost:5173
 База данных SQLite создастся автоматически в `subscription-app/server/data/subtrack.sqlite` (в Git не коммитится).
 Проверка работоспособности API и SQLite: `http://127.0.0.1:3001/api/health` → `{"ok":true,"database":"sqlite"}`.
 
+### Временный публичный доступ (туннель для демонстрации)
+Чтобы временно показать сайт по публичной HTTPS-ссылке (не используя Vite dev-сервер):
+1. Запустите единый production-сервер (`dist/` + API + SQLite на порту `3001`):
+   ```bash
+   cd subscription-app
+   npm start
+   ```
+2. Во втором терминале откройте временный туннель (например, Cloudflare Quick Tunnel):
+   ```bash
+   cloudflared tunnel --url http://127.0.0.1:3001
+   # или без установки cloudflared:
+   npx localtunnel --port 3001
+   ```
+Туннель выдаст временный HTTPS-адрес, который работает, пока ваш компьютер и оба терминала запущены.
+
 ---
 
 ## 📁 Документация в папке `/docs`

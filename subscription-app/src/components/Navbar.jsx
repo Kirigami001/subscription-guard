@@ -21,6 +21,16 @@ export default function Navbar({ theme, onToggleTheme, user, onLogout }) {
           <li><NavLink to="/add" onClick={() => setIsOpen(false)}>Добавить</NavLink></li>
           <li><NavLink to="/stats" onClick={() => setIsOpen(false)}>Статистика</NavLink></li>
           <li><NavLink to="/profile" onClick={() => setIsOpen(false)}>Профиль</NavLink></li>
+          <li className="mobile-only-nav">
+            <button
+              type="button"
+              className="btn btn-outline"
+              style={{ width: '100%' }}
+              onClick={() => { setIsOpen(false); onLogout(); }}
+            >
+              Выйти ({user?.name || user?.email})
+            </button>
+          </li>
         </ul>
 
         <Link to="/profile" className="user-badge">

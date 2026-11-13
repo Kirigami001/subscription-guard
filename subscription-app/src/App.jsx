@@ -40,7 +40,7 @@ export default function App() {
       const data = await subscriptionsApi.insights();
       setInsights(data);
     } catch {
-      // Insights will fall back to local calculations if unavailable
+      // Insights fall back to local calculations if unavailable
     }
   }, []);
 
@@ -77,23 +77,50 @@ export default function App() {
     await refreshInsights();
   };
 
-  const handleChangeStatus = async (id, status) => {
+  const handleUpdateSubscription = async (id, fields) => {
     try {
-      const { subscription } = await subscriptionsApi.status(id, status);
+      const { subscription } = await subscriptionsApi.update(id, fields);
       setSubscriptions((prev) => prev.map((s) => (s.id === id ? subscription : s)));
       setError('');
       await refreshInsights();
+      return subscription;
     } catch (err) {
       setError(err.message);
       throw err;
     }
   };
 
+  const handleChangeStatus = (id, status) => handleUpdateSubscription(id, { status });
+
   const handleTogglePause = (id) => {
     const current = subscriptions.find((s) => s.id === id);
     if (!current) return Promise.resolve();
     const nextStatus = current.status === 'paused' || current.status === 'cancelled' ? 'active' : 'paused';
     return handleChangeStatus(id, nextStatus);
+  };
+
+  const handleRenewSubscription = async (id) => {
+    try {
+      const { subscription } = await subscriptionsApi.renew(id);
+      setSubscriptions((prev) => prev.map((s) => (s.id === id ? subscription : s)));
+      setError('');
+      await refreshInsights();
+      return subscription;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
+  const handleSeedSubscriptions = async () => {
+    try {
+      const { subscriptions: seeded } = await subscriptionsApi.seed();
+      setSubscriptions(seeded);
+      setError('');
+      await refreshInsights();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleDeleteSubscription = async (id) => {
@@ -106,6 +133,14 @@ export default function App() {
       setError(err.message);
       throw err;
     }
+  };
+
+  const handleUpdateProfile = async (payload) => {
+    const { user: updatedUser } = await authApi.updateProfile(payload);
+    setUser(updatedUser);
+    setError('');
+    await refreshInsights();
+    return updatedUser;
   };
 
   const handleLogout = async () => {
@@ -167,6 +202,7 @@ export default function App() {
                 insights={insights}
                 onCancelSubscription={(id) => handleChangeStatus(id, 'cancelled')}
                 onDeleteSubscription={handleDeleteSubscription}
+                onSeedSubscriptions={handleSeedSubscriptions}
               />
             }
           />
@@ -177,6 +213,7 @@ export default function App() {
                 subscriptions={subscriptions}
                 onCancelSubscription={(id) => handleChangeStatus(id, 'cancelled')}
                 onDeleteSubscription={handleDeleteSubscription}
+                onSeedSubscriptions={handleSeedSubscriptions}
               />
             }
           />
@@ -186,6 +223,8 @@ export default function App() {
             element={
               <SubscriptionDetails
                 subscriptions={subscriptions}
+                onUpdateSubscription={handleUpdateSubscription}
+                onRenewSubscription={handleRenewSubscription}
                 onCancelSubscription={(id) => handleChangeStatus(id, 'cancelled')}
                 onTogglePause={handleTogglePause}
                 onDeleteSubscription={handleDeleteSubscription}
@@ -193,7 +232,7 @@ export default function App() {
             }
           />
           <Route path="stats" element={<Stats subscriptions={subscriptions} insights={insights} />} />
-          <Route path="profile" element={<Profile user={user} />} />
+          <Route path="profile" element={<Profile user={user} onUpdateProfile={handleUpdateProfile} />} />
         </Route>
         <Route path="*" element={<Navigate to={user ? '/' : '/login'} replace />} />
       </Routes>

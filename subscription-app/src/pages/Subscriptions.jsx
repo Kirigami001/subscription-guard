@@ -4,10 +4,16 @@ import SubscriptionCard from '../components/SubscriptionCard.jsx';
 import Button from '../components/Button.jsx';
 import { categoriesList } from '../data.js';
 
-export default function Subscriptions({ subscriptions, onCancelSubscription, onDeleteSubscription }) {
+export default function Subscriptions({
+  subscriptions,
+  onCancelSubscription,
+  onDeleteSubscription,
+  onSeedSubscriptions
+}) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [seeding, setSeeding] = useState(false);
 
   const statusLabels = {
     all: 'Все статусы',
@@ -24,11 +30,31 @@ export default function Subscriptions({ subscriptions, onCancelSubscription, onD
     return matchesSearch && matchesCat && matchesStatus;
   });
 
+  const handleSeed = async () => {
+    if (!onSeedSubscriptions) return;
+    setSeeding(true);
+    try {
+      await onSeedSubscriptions();
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Мои подписки</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Полный список ваших подписок с удобной фильтрацией и поиском</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Мои подписки</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Полный список ваших подписок с удобной фильтрацией и поиском</p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <a href="/api/subscriptions/export" download="subtrack-subscriptions.csv" className="btn btn-outline">
+            ⤓ Экспорт CSV
+          </a>
+          <Link to="/add">
+            <Button variant="primary">+ Добавить подписку</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Панель фильтров */}
@@ -75,10 +101,17 @@ export default function Subscriptions({ subscriptions, onCancelSubscription, onD
       {/* Список */}
       {subscriptions.length === 0 ? (
         <div className="page-panel" style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>
-          <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '12px' }}>У вас пока нет подписок</p>
-          <Link to="/add">
-            <Button variant="primary">+ Добавить подписку</Button>
-          </Link>
+          <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '16px' }}>У вас пока нет подписок</p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {onSeedSubscriptions && (
+              <Button variant="secondary" disabled={seeding} onClick={handleSeed}>
+                {seeding ? 'Загрузка…' : 'Загрузить примеры подписок'}
+              </Button>
+            )}
+            <Link to="/add">
+              <Button variant="primary">+ Добавить подписку</Button>
+            </Link>
+          </div>
         </div>
       ) : filtered.length === 0 ? (
         <div className="page-panel" style={{ textAlign: 'center', padding: '48px 20px', background: '#FFF', borderRadius: '12px', border: '1px solid var(--border)' }}>

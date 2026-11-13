@@ -59,6 +59,11 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     }),
+  updateProfile: (payload) =>
+    api('/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
   logout: () => api('/auth/logout', { method: 'POST' }),
 };
 
@@ -70,11 +75,18 @@ export const subscriptionsApi = {
       method: 'POST',
       body: JSON.stringify(subscription),
     }),
+  update: (id, fields) =>
+    api(`/subscriptions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(fields),
+    }),
   status: (id, status) =>
     api(`/subscriptions/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     }),
+  renew: (id) => api(`/subscriptions/${id}/renew`, { method: 'POST' }),
+  seed: () => api('/subscriptions/seed', { method: 'POST' }),
   remove: (id) => api(`/subscriptions/${id}`, { method: 'DELETE' }),
   insights: () => api('/insights'),
 };
